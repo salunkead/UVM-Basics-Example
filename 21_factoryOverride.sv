@@ -10,7 +10,8 @@
 4.we can use any one from 4
 */
 
-//Code
+//Code-1
+
 `include "uvm_macros.svh"
 import uvm_pkg::*;
 class main_class extends uvm_object;
@@ -52,4 +53,117 @@ module test;
       c.set_type_override_by_type(main_class::get_type,modified_class::get_type,1); //here we are replacing main_class with modified class
       c=comp::type_id::create("c",null);
     end
+endmodule
+
+//Code-2 Factory override-> create vs new
+//trying to replace updated driver component with driver component using new for object creation
+
+`include "uvm_macros.svh"
+import uvm_pkg::*;
+
+class driver extends uvm_component;
+  `uvm_component_utils(driver)
+  function new(string n="drv",uvm_component p=null);
+    super.new(n,p);
+  endfunction
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    `uvm_info("driver","build phase",UVM_NONE)
+  endfunction
+endclass
+
+class updated_driver extends driver;
+  `uvm_component_utils(updated_driver)
+  function new(string n="udrv",uvm_component p=null);
+    super.new(n,p);
+  endfunction
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    `uvm_info("updated driver","build_phase",UVM_NONE);
+  endfunction
+endclass
+
+class container extends uvm_component;
+  `uvm_component_utils(container)
+  function new(string n="con",uvm_component p=null);
+    super.new(n,p);
+  endfunction
+  driver drv;
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    drv=new("drv",this);
+  endfunction
+endclass
+
+class test extends uvm_test;
+  `uvm_component_utils(test)
+  function new(string n="test",uvm_component p=null);
+    super.new(n,p);
+  endfunction
+  container c;
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    driver::type_id::set_type_override(updated_driver::get_type(),1);
+    c=new("c",this);  //Cannot replace updated driver with driver when we use new method for object creation
+  endfunction
+endclass
+
+module top;
+  initial run_test("test");
+endmodule
+
+//Code-3
+//There are two must criteria for factory override 1.class must be registered with factory 2.object must be created using create method
+`include "uvm_macros.svh"
+import uvm_pkg::*;
+
+class driver extends uvm_component;
+  `uvm_component_utils(driver)
+  function new(string n="drv",uvm_component p=null);
+    super.new(n,p);
+  endfunction
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    `uvm_info("driver","build phase",UVM_NONE)
+  endfunction
+endclass
+
+class updated_driver extends driver;
+  `uvm_component_utils(updated_driver)
+  function new(string n="udrv",uvm_component p=null);
+    super.new(n,p);
+  endfunction
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    `uvm_info("updated driver","build_phase",UVM_NONE);
+  endfunction
+endclass
+
+class container extends uvm_component;
+  `uvm_component_utils(container)
+  function new(string n="con",uvm_component p=null);
+    super.new(n,p);
+  endfunction
+  driver drv;
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    drv=driver::type_id::create("drv",this);
+  endfunction
+endclass
+
+class test extends uvm_test;
+  `uvm_component_utils(test)
+  function new(string n="test",uvm_component p=null);
+    super.new(n,p);
+  endfunction
+  container c;
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    driver::type_id::set_type_override(updated_driver::get_type(),1);
+    c=container::type_id::create("c",this);
+  endfunction
+endclass
+
+module top;
+  initial run_test("test");
 endmodule
