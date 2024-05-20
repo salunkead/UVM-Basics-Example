@@ -1,6 +1,6 @@
 //run_phase with sub phase execution behaviour
 /*
-1.here both run_phase and main phase will execute parallely
+1.here both run_phase and sub_phase(reset,configure,main,shut_down phase) run parallely
 */
 
 //Example
