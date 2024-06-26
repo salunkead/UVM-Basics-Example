@@ -7,8 +7,10 @@
  -> Removes any locks or grabs obtained by this sequence on the specified sequencer.  
  -> If sequencer is null, then the unlock will be done on the current default sequencer.
 3.Difference in lock and grab method:-
-  1.grab is a non-blocking method where as lock is a blocking method
-  2.grab method jumps ahead of arbitration where lock method respects arbitration priority
+  1.the lock method puts a lock request at the back of the sequencer queue
+  2.the grab method is similar to lock,but puts a grab request at the front of the arbitration queue,it immediately takes control
+  by overriding other sequence priority
+  3.the grab request is serviced more quickly compoared to lock
 */
 
 //Example
